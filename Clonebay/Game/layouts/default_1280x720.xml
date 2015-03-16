@@ -1,0 +1,12 @@
+<layout>
+	<screen>
+		<x = 1280>
+		<y = 720>
+	</screen>
+	
+	<mainMenu>
+		<background_image = ''/>
+		<music_file = '../audio/music/bp_MUS_TitleScreen.ogg' />
+	</mainMenu>
+
+</layout>
