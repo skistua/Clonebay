@@ -70,7 +70,7 @@ class DataEngine:
         for gameFile in self.game_data.items():
             try:
                 if(any(data_type in item for item in gameFile)):
-                    listy = list(gameFile)
+                    listy = list(gameFile) #THIS IS STUPID!  DON'T DO THIS! USE DICTRIGHT!
                     if data_type in listy[1]:
                         for data_item in listy[1][data_type]:
                             
