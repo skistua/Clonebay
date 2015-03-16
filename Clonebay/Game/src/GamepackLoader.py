@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import Path #Breaks for python < 3.4
 import os
 import glob
 from src.dataLoader import loadGameData
@@ -8,7 +8,7 @@ from src.dataLoader import loadGameData
 def loadGamepacks():
     gamepacks = {}
     
-    game_path = Path('../')
+    game_path = Path('./')
     gamepacks_path = game_path / 'gamepacks'
     print("Looking for gamepacks:")
     for gamepack_path in list(gamepacks_path.glob('*')):

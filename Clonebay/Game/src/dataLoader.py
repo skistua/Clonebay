@@ -1,4 +1,4 @@
-import xmltodict
+from src.xmltodict import parse
 import os, glob
 from pathlib import Path
 import re
@@ -37,7 +37,7 @@ def loadGameData(data_path):
                     #turn it into valid xml so the parser doesn't choke on the comments and lack of encapuslating tag
                 data = "<"+shipFile+">" + data + "</" + shipFile + ">"
                     #print(eventFile)
-                obj = xmltodict.parse(data)
+                obj = parse(data)
             
                 ships[shipFile] = obj[shipFile]
                 f.close()
@@ -113,7 +113,7 @@ def loadGameData(data_path):
             data = "<"+basename+">" + data + "</"+basename+">"
             f.close()
             usedfiles.append(filename)
-            obj = xmltodict.parse(data)
+            obj = parse(data)
             game_data.update(obj)
     
               

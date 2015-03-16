@@ -1,6 +1,6 @@
 from collections import OrderedDict
 import random
-import xmltodict
+import src.xmltodict
 from random import randint
 from src.dataLoader import loadGameData
 
