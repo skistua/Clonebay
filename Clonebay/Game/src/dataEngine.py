@@ -17,21 +17,17 @@ class DataEngine:
         self.player['score'] = 0
         self.player['shipsDefeated'] = 0
         self.player
+        
+        #This is very unpythonic.
         self.i = 0
         self.j = 0
         while self.i < len(self.world_map):
-            print("sector: " + self.world_map[self.i]['description']['@name'])
             while self.j < len(self.world_map[self.i]['beacons']):
                 if self.j != 10000:
                     mapEvent = self.world_map[self.i]['beacons'][self.j]['event']
                     mapEvent = self.load_event(mapEvent)
-                    try:
-                        print (mapEvent['@name'])
-                    except(KeyError):
-                        print ("MISSING KEY")
-                        mapEvent['@name'] = 'ERROR'
-                        #mapEvent['text'] = 'ERROR'
-                    print(mapEvent['text'])
+                    
+
                 
                     if 'choice' in mapEvent:
                         mapEvent['choices'] = []
@@ -44,17 +40,18 @@ class DataEngine:
                             except(TypeError):
                                 mapEvent['choices'].append(mapEvent['choice'])
                                 break
-                            
-                        for choice in mapEvent['choices']:
-                            try:
-                                print('\t'+choice['text'])
-                            except(TypeError):
-                                try:
-                                    choice['text'] = choice['text']['#text']
-                                    print('\t ALMOST ERROR: #text'+choice['text'])
-                                except(KeyError):
-                                    print("ERROR!!!")
-                                    print(choice)
+                         
+                        ### Don't need these prints, but this might come up again.    
+                        #for choice in mapEvent['choices']:
+                        #    try:
+                        #        print('\t'+choice['text'])
+                        #    except(TypeError):
+                        #        try:
+                        #            choice['text'] = choice['text']['#text']
+                        #            print('\t ALMOST ERROR: #text'+choice['text'])
+                        #        except(KeyError):
+                        #            print("ERROR!!!")
+                        #            print(choice)
                                 
                         
                     if 'shipBlueprint' in mapEvent:

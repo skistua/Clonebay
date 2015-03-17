@@ -43,7 +43,7 @@ def buildSectorMap(game_data, events, eventLists):
     while(sectorCount < 8):
         minsector = 1000
         randSector = randint(0, len(sectorDescriptions) - 1)
-        while (minsector > sectorCount) and desc != 'CRYSTAL HOME':
+        while (minsector > sectorCount) and sectorDescriptions[randSector]['@name'] != 'CRYSTAL HOME': #T
             randSector = randint(0, len(sectorDescriptions) - 1)
             minsector = int(sectorDescriptions[randSector]['@minSector'])
             desc = sectorDescriptions[randSector]['@name']
