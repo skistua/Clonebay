@@ -1,0 +1,2 @@
+GPL V3
+http://www.gnu.org/copyleft/gpl.html
