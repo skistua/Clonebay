@@ -19,6 +19,7 @@ def initPlayerShip(ps, images):
     ps.tiles_offset = ((ps.floor_rect.w - ps.width) / 2, (ps.floor_rect.h - ps.height)/2)
     for k, room in ps.rooms.items():
         room['rect'] = Rect(room['x_pix'], room['y_pix'], room['w_pix'], room['h_pix'])
+        
 
     
 
