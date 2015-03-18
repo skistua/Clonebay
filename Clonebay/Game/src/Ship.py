@@ -40,7 +40,7 @@ class Ship:
                 gib[k] = {max: float(giblet[k]['@max']),
                           min: float(giblet[k]['@min'])}
             self.gibs.append(gib)
-        
+        self.tiles = []
         self.ship_systems = {}
         self.rooms = bp['layout']['rooms']
         for k, room in self.rooms.items():
@@ -50,6 +50,20 @@ class Ship:
             room['h_pix'] = 35 * room['h']
             room['loc'] = (room['x_pix'], room['y_pix'])
             room['tiles'] = []
+            i = 0
+            j = 0
+            
+            while i < room['w']:
+                while j < room['h']:
+                    tile = (room['x_pix'] + i * 35, room['y_pix'] + j * 35)
+                    room['tiles'].append(tile)
+                    self.tiles.append(tile)
+                    j += 1
+                j = 0
+                i += 1
+            
+            
+            
             
             for system_name, ship_system in bp['systemList'].items():
                 if int(ship_system['@room']) == room['id']:
@@ -78,7 +92,10 @@ class Ship:
                                 break
                         
                     else:
-                        room['image'] = 'blank'
+                        break
+            
+            
+
                 
                         
                     
