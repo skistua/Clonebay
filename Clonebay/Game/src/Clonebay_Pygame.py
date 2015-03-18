@@ -11,21 +11,35 @@ WHITE = (255, 255, 255)
 FLOOR = (230, 226, 219)
 TILEBORDER = (172, 169, 164)
 
-def initPlayerShip(ps, images):
-    ps.base_image = images[ps.base_image_name]
+def initPlayerShip(ps, de):
+    ps.base_image = pygame.image.load(str(de.gamepack['img'][ps.base_image_name])).convert_alpha()
     ps.base_rect = ps.base_image.get_rect()
-    ps.floor_image = images[ps.floor_image_name]
+    ps.floor_image = pygame.image.load(str(de.gamepack['img'][ps.floor_image_name])).convert_alpha()
     ps.floor_rect = ps.floor_image.get_rect()
     ps.tiles_offset = ((ps.floor_rect.w - ps.width) / 2, (ps.floor_rect.h - ps.height)/2)
     for k, room in ps.rooms.items():
         room['rect'] = Rect(room['x_pix'], room['y_pix'], room['w_pix'], room['h_pix'])
+        for key, v in room.items():
+            if key == 'image':
+                try:
+                    room['roomimage'] = pygame.image.load(str(de.gamepack['img'][room['image']])).convert_alpha()
+                    room['imagerect'] = room['roomimage'].get_rect()
+                    break
+                    
+                except(KeyError):
+                    print('image not found: ' + room['image'])
+        for key, v in room.items():
+            if key == 'system':
+                room['system_image'] = pygame.image.load(str(de.gamepack['img']['s_' + room['system']['name'] + '_overlay'])).convert_alpha()
+                room['system_image_rect'] = room['system_image'].get_rect()
+                break
         
 
     
 
     
 
-def blitPlayerShip(ps, location, screen, images):
+def blitPlayerShip(ps, location, screen, de):
     ps.base_rect.center = location
     screen.blit(ps.base_image, ps.base_rect)
     
@@ -49,18 +63,15 @@ def blitPlayerShip(ps, location, screen, images):
         for key, v in room.items():
             if key == 'image':
                 try:
-                    imagerect = images[room['image']].get_rect()
-                    imagerect.topleft = room['rect'].topleft
-                    screen.blit(images[room['image']], imagerect)
+                    room['imagerect'].topleft = room['rect'].topleft
+                    screen.blit(room['roomimage'], room['imagerect'])
                 except(KeyError):
                     print('image not found: ' + room['image'])
         
         for key, v in room.items():
             if key == 'system':
-                system_image = images['s_' + room['system']['name'] + '_overlay']
-                system_image_rect = system_image.get_rect()
-                system_image_rect.center = room['rect'].center
-                screen.blit(system_image, system_image_rect)
+                room['system_image_rect'].center = room['rect'].center
+                screen.blit(room['system_image'], room['system_image_rect'])
         draw.rect(screen, BLACK, room['rect'],  3)
             #room0_x = room0_x + ps_floor_location[0]
             #room0_y = room0_y + ps_floor_location[1]
@@ -103,19 +114,19 @@ def play():
     #partytime
     images = {}
     print('Loading images...')
-    for image_file, image_path in de.gamepack['img'].items():
-        print('\t'+image_file)
-        if image_file != 'path':
-            images[image_file] = pygame.image.load(str(image_path)).convert_alpha()
+    #for image_file, image_path in de.gamepack['img'].items():
+    #    print('\t'+image_file)
+    #    if image_file != 'path':
+    #        images[image_file] = pygame.image.load(str(image_path)).convert_alpha()
     
-    de.images = images #Just for Debugging.  de shouldn't need this.
-    map_background = images['zone_1']
+    #de.images = images #Just for Debugging.  de shouldn't need this.
+    #map_background = images['zone_1']
     pygame.mouse.set_visible(False)
     
     #main menu images
-    hangar_background = images['custom_main']
-    pointer_valid = images['pointerValid']
-    pointer_invalid = images['pointerInvalid']
+    hangar_background = pygame.image.load(str(de.gamepack['img']['custom_main'])).convert()
+    pointer_valid = pygame.image.load(str(de.gamepack['img']['pointerValid'])).convert_alpha()
+    pointer_invalid = pygame.image.load(str(de.gamepack['img']['pointerInvalid'])).convert_alpha()
     
     buttons = {}
     buttons_top = 285
@@ -128,7 +139,7 @@ def play():
         button['image'] = {}
         for button_suffix in button_suffixes:
             button_image_string = button_name + '_' + button_suffix
-            button['image'][button_suffix] =  images[button_image_string]
+            button['image'][button_suffix] =  pygame.image.load(str(de.gamepack['img'][button_image_string])).convert_alpha()
         button['image']['current'] = button['image']['on']
         button['name'] = button_name
         button['rect'] = button['image']['on'].get_rect()
@@ -186,7 +197,7 @@ def play():
             print(shipBlueprint['name'])
     player_ships_count = len(player_ships) - 1
     de.player_ship = Ship(player_ships[0], de)
-    initPlayerShip(de.player_ship, images)
+    initPlayerShip(de.player_ship, de)
     # game
     subview = ''
     # beacon_map
@@ -290,7 +301,7 @@ def play():
                         else: 
                             player_ship_index += 1
                         de.player_ship = Ship(player_ships[player_ship_index], de)
-                        initPlayerShip(de.player_ship, images)
+                        initPlayerShip(de.player_ship, de)
                         print("Ship selected: " + de.player_ship.id + " -- "+ de.player_ship.name)
                     pressing_key = True
                 elif event.key == K_DOWN and down:
@@ -300,13 +311,13 @@ def play():
                         else: 
                             player_ship_index -= 1
                         de.player_ship = Ship(player_ships[player_ship_index], de)
-                        initPlayerShip(de.player_ship, images)
+                        initPlayerShip(de.player_ship, de)
                         print("Ship selected: " + de.player_ship.id + " -- "+ de.player_ship.name)
                     pressing_key = True
             
     
             screen.blit(hangar_background, screen.get_rect())
-            blitPlayerShip(de.player_ship, (640, 210), screen, images)
+            blitPlayerShip(de.player_ship, (640, 210), screen, de)
             
             
             
