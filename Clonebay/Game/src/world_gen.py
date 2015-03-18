@@ -43,7 +43,7 @@ def buildSectorMap(game_data, events, eventLists):
     while(sectorCount < 8):
         minsector = 1000
         randSector = randint(0, len(sectorDescriptions) - 1)
-        while (minsector > sectorCount) and sectorDescriptions[randSector]['@name'] != 'CRYSTAL HOME': #T
+        while (minsector > sectorCount) and desc != 'CRYSTAL HOME': 
             randSector = randint(0, len(sectorDescriptions) - 1)
             minsector = int(sectorDescriptions[randSector]['@minSector'])
             desc = sectorDescriptions[randSector]['@name']
@@ -130,7 +130,7 @@ def buildSector(description, sectorNum, game_data, events, eventLists):
         
         
                 
-    #todo:  pathfinding to make sure all nodes are accessable    
+    #todo:  pathfinding to make sure all nodes are accessible    
     return sector
 
 

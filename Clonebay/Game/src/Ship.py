@@ -4,10 +4,11 @@
 
 
 class Ship:
-    def __init__(self, bp):
+    def __init__(self, bp, de):
         self.blueprint = bp
         #get all the data from the blueprint, and cast it correctly
         self.id = bp['@name']
+        print("loading ship: " + self.id)
         self.basename = bp['@img']
         self.base_image_name = self.basename +'_base'
         if 'floorImage' in bp:
@@ -40,27 +41,46 @@ class Ship:
                           min: float(giblet[k]['@min'])}
             self.gibs.append(gib)
         
-        self.ship_systems = []
+        self.ship_systems = {}
         self.rooms = bp['layout']['rooms']
         for k, room in self.rooms.items():
             room['x_pix'] =  35 * room['x']
             room['y_pix'] = 35 * room['y']
+            room['w_pix'] = 35 * room['w']
+            room['h_pix'] = 35 * room['h']
             room['loc'] = (room['x_pix'], room['y_pix'])
             room['tiles'] = []
+            
             for system_name, ship_system in bp['systemList'].items():
                 if int(ship_system['@room']) == room['id']:
+                    
+                    #fed cruisers don't have start tags on artillery.  They should start with them.
+                    for k, v in ship_system.items():
+                        if k == '@start':
+                            break
+                    else:
+                        print(self.id + ': ' + system_name + "is missing start tag")
+                        ship_system['@start'] = 'true'
+                        
                     if ship_system['@start'] == 'true':
                         print(system_name)
                         room['system'] = {}
                         room['system']['name'] = system_name
                         if '@img' not in ship_system: 
-                            print('no img tag found for ' + system_name) #it's the clonebay.  need to find the img
+                            print('no img tag found for ' + system_name) #
+                            room['image'] = 'room_' + system_name
                         else:
                             room['image'] = ship_system['@img']
-                        self.ship_systems.append((system_name, ship_system))
+                        for systemBlueprint in de.systemBlueprints:
+                            if systemBlueprint['@name'] == system_name:
+                                self.ship_systems[system_name] = ship_system
+                                self.ship_systems[system_name]['blueprint'] = systemBlueprint
+                                break
+                        
                     else:
                         room['image'] = 'blank'
-            
+                
+                        
                     
         
         self.doors = bp['layout']['doors']
