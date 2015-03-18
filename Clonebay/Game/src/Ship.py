@@ -53,7 +53,10 @@ class Ship:
                         print(system_name)
                         room['system'] = {}
                         room['system']['name'] = system_name
-                        room['image'] = ship_system['@img']
+                        if '@img' not in ship_system: 
+                            print('no img tag found for ' + system_name) #it's the clonebay.  need to find the img
+                        else:
+                            room['image'] = ship_system['@img']
                         self.ship_systems.append((system_name, ship_system))
                     else:
                         room['image'] = 'blank'
