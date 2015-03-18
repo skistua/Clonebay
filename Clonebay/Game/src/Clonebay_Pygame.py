@@ -140,13 +140,14 @@ def play():
     
     #load sounds
     
+    #Can't preload sounds and have it still work on pi.
     print('Loading sounds ...')
     
     sounds = {}
-    for sound_file, sound_path in de.gamepack['sounds'].items():
-        print('\t'+sound_file)
-        if sound_file != 'path':
-            sounds[sound_file] = pygame.mixer.Sound(str(sound_path))
+    #for sound_file, sound_path in de.gamepack['sounds'].items():
+    #    print('\t'+sound_file)
+    #    if sound_file != 'path':
+    #        sounds[sound_file] = pygame.mixer.Sound(str(sound_path))
             
     print('Loading Music...')
     #loading all these sounds in advance chews up fucktons of RAM
@@ -157,7 +158,7 @@ def play():
             #music[music_file] = pygame.mixer.Sound(str(music_path))
     #initialize the game state
     
-    bleep = sounds['select_light1']
+    bleep = pygame.mixer.Sound(str(de.gamepack['sounds']['select_light1']))
     music_vol = 0.1
     
     
