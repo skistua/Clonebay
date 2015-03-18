@@ -22,6 +22,12 @@ class Ship:
             self.shield_image_name = self.basename + '_shields1'
         
         
+        self.floor_offset = {'x': int(bp['layout']['offsets']['floor']['@x']), 
+                             'y': int(bp['layout']['offsets']['floor']['@y'])}
+        self.cloak_offset = {'x': int(bp['layout']['offsets']['cloak']['@x']), 
+                             'y': int(bp['layout']['offsets']['cloak']['@y'])}
+        
+        
         self.crew = []
         #add the crew
         
@@ -61,6 +67,8 @@ class Ship:
                     j += 1
                 j = 0
                 i += 1
+                
+
             
             
             
@@ -92,13 +100,23 @@ class Ship:
                                 break
                         
                     else:
-                        break
+                        break                  
+        
+        self.min_x = 0
+        self.min_y = 0
+        self.max_x = 0
+        self.max_y = 0
+        #i know there's a more pythonic way to do this...
+        for tile in self.tiles:
+            if tile[0] > self.max_x:
+                self.max_x = tile[0]
+            if tile[1] > self.max_y:
+                self.max_y = tile[1]
             
-            
-
-                
-                        
-                    
+        self.width = self.max_x - self.min_x + 35
+        self.height = self.max_y - self.min_y + 35
+        
+        print('dimensions: ' + str(self.width) + ' x ' + str(self.height))
         
         self.doors = bp['layout']['doors']
             
@@ -112,10 +130,7 @@ class Ship:
         self.max_power = int(bp['maxPower']['@amount'])
         self.name = bp['name']
         self.ellipse = bp['layout']['ellipse']
-        self.floor_offset = {'x': int(bp['layout']['offsets']['floor']['@x']), 
-                             'y': int(bp['layout']['offsets']['floor']['@y'])}
-        self.cloak_offset = {'x': int(bp['layout']['offsets']['cloak']['@x']), 
-                              'y': int(bp['layout']['offsets']['cloak']['@y'])}
+
                              
         
     
