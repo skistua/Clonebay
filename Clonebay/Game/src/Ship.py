@@ -40,7 +40,26 @@ class Ship:
                           min: float(giblet[k]['@min'])}
             self.gibs.append(gib)
         
+        self.ship_systems = []
         self.rooms = bp['layout']['rooms']
+        for k, room in self.rooms.items():
+            room['x_pix'] =  35 * room['x']
+            room['y_pix'] = 35 * room['y']
+            room['loc'] = (room['x_pix'], room['y_pix'])
+            room['tiles'] = []
+            for system_name, ship_system in bp['systemList'].items():
+                if int(ship_system['@room']) == room['id']:
+                    if ship_system['@start'] == 'true':
+                        print(system_name)
+                        room['system'] = {}
+                        room['system']['name'] = system_name
+                        room['image'] = ship_system['@img']
+                        self.ship_systems.append((system_name, ship_system))
+                    else:
+                        room['image'] = 'blank'
+            
+                    
+        
         self.doors = bp['layout']['doors']
             
         self.layout = bp['layout']
