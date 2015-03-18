@@ -1,7 +1,6 @@
 from src.GamepackLoader import loadGamepacks
 from src.world_gen import genWorld
-from numpy.oldnumeric.random_array import randint
-import pygame
+from random import randint
 
 class DataEngine:
     def tick(self):
@@ -86,7 +85,7 @@ class DataEngine:
     
     def load_event(self, meta_event):
         if 'event' in meta_event:
-            max_item = len(meta_event['event'])
+            max_item = len(meta_event['event']) - 1
             randomizer = randint(0, max_item)
             new_event = ''
             try:
