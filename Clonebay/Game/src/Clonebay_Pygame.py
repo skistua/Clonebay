@@ -2,6 +2,7 @@ import pygame, math, sys
 from pygame.locals import * 
 from pygame import Rect
 from pygame import draw
+from random import randint
 
 from src.dataEngine import DataEngine
 from src.Ship import Ship
@@ -10,6 +11,8 @@ BLACK = (0,0,0)
 WHITE = (255, 255, 255)
 FLOOR = (230, 226, 219)
 TILEBORDER = (172, 169, 164)
+
+
 
 def initPlayerShip(ps, de):
     ps.base_image = pygame.image.load(str(de.gamepack['img'][ps.base_image_name])).convert_alpha()
@@ -33,13 +36,10 @@ def initPlayerShip(ps, de):
                 room['system_image'] = pygame.image.load(str(de.gamepack['img']['s_' + room['system']['name'] + '_overlay'])).convert_alpha()
                 room['system_image_rect'] = room['system_image'].get_rect()
                 break
-        
-
-    
-
-    
+            
 
 def blitPlayerShip(ps, location, screen, de):
+    # NEED TO CHECK VISIBILITY
     ps.base_rect.center = location
     screen.blit(ps.base_image, ps.base_rect)
     
@@ -75,12 +75,13 @@ def blitPlayerShip(ps, location, screen, de):
         for key, v in room.items():
             if key == 'system':
                 room['system_image_rect'].center = room['rect'].center
-                screen.blit(room['system_image'], room['system_image_rect'])
+                screen.blit(room['system_image'], room['system_image_rect']) #These should be masks
                 break
         draw.rect(screen, BLACK, room['rect'],  3)
             #room0_x = room0_x + ps_floor_location[0]
             #room0_y = room0_y + ps_floor_location[1]
-    
+        #for crew_member in ps.crew:
+        #    blitCrewMember(crew_member, ps, de, screen)
     
     
 
@@ -168,6 +169,29 @@ def play():
     print('Loading Music...')
     #loading all these sounds in advance chews up fucktons of RAM
     music = {}
+    
+    #DO THIS SOMEWHERE ELSE!  Inconsistencies make this tough!
+    mpre = 'bp_MUS_'
+    track_map = {'civil': 'Civil',
+                 'colonial': 'Colonial',
+                 'cosmos': 'Cosmos',
+                 'debris': 'Debris',
+                 'deepspace': 'Deepspace',
+                 'engi': 'Engi',
+                 'hack': 'Hack',
+                 'lostship': 'LostShip',
+                 'mantis': 'Mantis',
+                 'rockmen': 'Rockmen',
+                 'shrike': 'Shrike',
+                 'slug': 'Slug',
+                 'void': 'Void',
+                 'wasteland': 'Wasteland',
+                 'zoltan': 'Zoltan'                 
+                 }
+    print(track_map)
+    for key, value in track_map.items():
+        track_map[key] = mpre + value
+    
     #for music_file, music_path in de.gamepack['music'].items():
         #print('\t'+music_file)
         #if music_file != 'path':
@@ -204,7 +228,7 @@ def play():
     de.player_ship = Ship(player_ships[0], de)
     initPlayerShip(de.player_ship, de)
     # game
-    subview = ''
+    subview = 'none'
     # beacon_map
     # sector_map
     # game_menu
@@ -225,11 +249,6 @@ def play():
             for event in pygame.event.get():
                 if not hasattr(event, 'key'): continue
                 down = event.type == KEYDOWN
-                    #KEY DOWN OR UP?
-                if event.key == K_RIGHT: k_right = down * 5
-                elif event.key == K_LEFT: k_left = down * 5
-                elif event.key == K_UP: k_up = down * 2
-                elif event.key == K_DOWN: k_down = down * 2
                 pass   
             #stuff to do first time:
             if first_time:
@@ -299,6 +318,9 @@ def play():
                     #KEY DOWN OR UP?
                 if event.key == K_ESCAPE: 
                     game_view = 'main_menu'
+                elif event.key == K_RETURN:
+                    game_view = 'game'
+                    first_time = True
                 elif event.key == K_UP and down:
                     if not pressing_key:
                         if player_ship_index == player_ships_count:
@@ -326,78 +348,127 @@ def play():
             
             
             
-    
         elif game_view == 'game':
-    
-            if not paused:
-                de.tick()
-            for event in pygame.event.get():
-                if not hasattr(event, 'key'): continue
+            
+            #This needs to happen early, or stuff won't work.
+             #Store these for different handling based on context.
+            
+
+            if first_time:
+                #get the starting event
+                cur_sector = de.world_map[0]
+                cur_beacon = cur_sector['beacons'][0]
+                cur_event = cur_beacon['event']
+                subview = 'show_event'
+                first_time = False
+                #set up the music
+                title_music.stop()
+                avl_tracks = cur_sector['description']['trackList']['track']
+                randomizer = randint(0, len(avl_tracks) - 1)
+                trackset = avl_tracks[randomizer]
                 
-                   
-                    
+                #Need to clean this stuff up in dataloader
+                
+                mus_explore =  pygame.mixer.Sound(str(de.gamepack['music'][track_map[trackset]+'EXPLORE']))
+                mus_battle =   pygame.mixer.Sound(str(de.gamepack['music'][track_map[trackset]+'BATTLE']))
+                mus_explore.set_volume(music_vol)
+                mus_explore.set_volume(0)
+                mus_explore.play(-1)
+                mus_battle.play(-1)
+                pass
+            
+            frame_events = pygame.event.get()
+            # do input handling that should happen consistently every frame, such as 'KEY_ESC'.
+            
+            
+            #de.tick(paused)
             
             #BLITTING ORDER: (FROM BOTTOM TO TOP)
             #    background 
             #        background image
             #        background planets
-            #
-            #    player ship
-            #        shield
-            #        base
-            #        floor
-            #        rooms
-            #            ???DOORS?
-            #            breaches
-            #            o2level
-            #            fires
-            #            systems
-            #            people
-            #
-            #    enemy ship
             #    
-            #    projectiles
+            #    player ship (Location depends if in_combat)
+            #            
+            #    if in combat
+            #        enemy ship
             #    
-            #    effects?
+            #        projectiles
+            #    
             #    
             #    Main UI Stuffs
             #
+            #    subviews:
+            #        'esc' menu
+            #        'beacon_map'
+            #        'show_event'
+            #        'upgrades'
+            #        'crew'
+            #        'equipment'
+            #        'store'
+            #
             #    Menus
             
-            
-            
-            
-            
-            
-            x, y = position
-            
-            
-            position = screen_center
-            
-        
     
             
-            map_background_rect = map_background.get_rect()
-            map_background_rect.center = screen_center
-            map_overlay_rect = map_overlay.get_rect()
-            map_overlay_rect.center = screen_center
+            #draw the background
+            screen.fill(BLACK)
+            #do more here
             
             
-           
             
-            screen.blit(map_background, map_background_rect)
-            #screen.blit(map_overlay, map_overlay_rect)
-        
-            countie += 1
-            if countie == 600:
-                countie = 0
-                indy = indy + 1
-                if indy == 7:
-                    indy = 0
-            
+            #Draw ships
+            if not in_combat:
+                position = screen_center
+                blitPlayerShip(de.player_ship, position, screen, de)
                 
-            for beacon in de.world_map[indy]['beacons'].items():
-                listy = list(beacon)
+            else:
+                position = screen_center #just for now,  figure out the offsets later.
+                blitPlayerShip(de.player_ship, position, screen, de)
+                #blitEnemyShip()
+                #blitProjectiles()
+                #
+                
+                #pass 
+
+                #input handling
+                
+
+            if subview == 'show_event':
+                paused = True
+                print (cur_event['text'])
+                
+                
+                #blit the event window
+                
+                
+                #blit the text
+                
+                
+                #blit the choices
+                if 'choices' in cur_event:
+                    choices = cur_event['choices']
+                    for k, choice in choices:
+                        print(choice['text'])
+                #for choice in event_cur['choices']:
+                #    pass
+                
+                
+                #input handling
+                
+                #process the outcome
+                
+
+                
+            
+            
+            
+            if subview == 'beacon_map':    
+                
+                screen.blit(map_background, map_background_rect)
+                for beacon in de.world_map[indy]['beacons'].items():
+                
+                    listy = list(beacon)
                 print("Blitting Sector: " + str(indy + 1) + ". beacon_id: " + str(listy[1]['id']))
                 beacon_x = listy[1]['x'] + 300
                 beacon_y = listy[1]['y'] + 165
@@ -405,6 +476,8 @@ def play():
                 beacon_location = (beacon_x, beacon_y)
                 beacon_rect.center =beacon_location
                 screen.blit(beacon_image, beacon_rect)
+            
+            #de.tickPost()
                 
         screen.blit(mouse_image, mousepos)
         pygame.display.flip()    
