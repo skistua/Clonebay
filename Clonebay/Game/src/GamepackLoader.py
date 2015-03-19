@@ -1,6 +1,4 @@
 from src.pathlib import Path 
-import os
-import glob
 from src.dataLoader import loadGameData
 
 

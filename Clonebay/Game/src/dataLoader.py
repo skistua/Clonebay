@@ -1,9 +1,8 @@
 from src.xmltodict import parse
-import os, glob
-from pathlib import Path
+import glob
+from src.pathlib import Path
 import re
 import collections
-from _pickle import dump
 
 
 
