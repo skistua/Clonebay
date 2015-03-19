@@ -200,6 +200,7 @@ def play():
     
     bleep = pygame.mixer.Sound(str(de.gamepack['sounds']['select_light1']))
     music_vol = 0.1
+    game_vol = 1.0
     
     
     current_vol = 0.000
@@ -311,6 +312,7 @@ def play():
             pass
         
         elif game_view == 'hangar':
+            #handle inputs
             for event in pygame.event.get():
                 if not hasattr(event, 'key'): continue
                 down = event.type == KEYDOWN
@@ -393,7 +395,7 @@ def play():
             #    if in combat
             #        enemy ship
             #    
-            #        projectiles
+            #    projectiles
             #    
             #    
             #    Main UI Stuffs
@@ -430,11 +432,16 @@ def play():
                 #
                 
                 #pass 
+            #blit systems and crew UI
+            
+            if subview == 'none':
+                #handle inputs for combat, or idling
+                #everything should already be drawn.
+                pass
 
-                #input handling
                 
 
-            if subview == 'show_event':
+            elif subview == 'show_event':
                 paused = True
                 print (cur_event['text'])
                 
@@ -454,6 +461,8 @@ def play():
                 #    pass
                 
                 
+                #blit systems, crew UI
+                
                 #input handling
                 
                 #process the outcome
@@ -463,7 +472,7 @@ def play():
             
             
             
-            if subview == 'beacon_map':    
+            elif subview == 'beacon_map':    
                 
                 screen.blit(map_background, map_background_rect)
                 for beacon in de.world_map[indy]['beacons'].items():
@@ -476,6 +485,47 @@ def play():
                 beacon_location = (beacon_x, beacon_y)
                 beacon_rect.center =beacon_location
                 screen.blit(beacon_image, beacon_rect)
+            
+            
+
+            
+            
+            elif subview == 'sector_map':
+                #handle inputs
+                pass
+            
+            
+    
+            
+            elif subview == 'upgrades':
+                #handle inputs
+                pass
+            
+            elif subview == 'equipment':
+                #handle inputs
+                pass
+            
+            elif subview == 'crew':
+                #handle inputs
+                pass
+            
+            elif subview == 'store':
+                pass
+            
+            #blit ship stats ui (Shields, scrap, hull, etc...)
+            #This stuff is not interactive
+            
+            
+            
+            if show_game_menu:
+                #handle inputs
+                pass
+            
+            
+            
+            
+            
+            
             
             #de.tickPost()
                 

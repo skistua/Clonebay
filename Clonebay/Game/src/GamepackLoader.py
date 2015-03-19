@@ -1,4 +1,4 @@
-from pathlib import Path #Breaks for python < 3.4
+from src.pathlib import Path 
 import os
 import glob
 from src.dataLoader import loadGameData
