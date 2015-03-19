@@ -51,6 +51,8 @@ def blitPlayerShip(ps, location, screen, de):
     for tile in ps.tiles:
          tile_rect.topleft = tuple(map(sum,zip(tile, ps.floor_location, ps.tiles_offset)))
          screen.fill(FLOOR, tile_rect)
+         
+         #draw.rect not HW accelerated?  Might be punishing rpi.
          draw.rect(screen, TILEBORDER, tile_rect,  1)
          
     
@@ -66,12 +68,15 @@ def blitPlayerShip(ps, location, screen, de):
                     room['imagerect'].topleft = room['rect'].topleft
                     screen.blit(room['roomimage'], room['imagerect'])
                 except(KeyError):
-                    print('image not found: ' + room['image'])
+                    pass
+                    #print('image not found: ' + room['image'])
+                break
         
         for key, v in room.items():
             if key == 'system':
                 room['system_image_rect'].center = room['rect'].center
                 screen.blit(room['system_image'], room['system_image_rect'])
+                break
         draw.rect(screen, BLACK, room['rect'],  3)
             #room0_x = room0_x + ps_floor_location[0]
             #room0_y = room0_y + ps_floor_location[1]

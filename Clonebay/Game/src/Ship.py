@@ -89,8 +89,13 @@ class Ship:
                         room['system'] = {}
                         room['system']['name'] = system_name
                         if '@img' not in ship_system: 
-                            print('no img tag found for ' + system_name) #
-                            room['image'] = 'room_' + system_name
+                            print('no img tag found for ' + system_name)
+                            if system_name == 'clonebay':
+                                room['image'] = 'clone_top'
+                            elif system_name == 'teleporter':
+                                room['image'] = 'teleporter_off'
+                            else:
+                                room['image'] = 'room_' + system_name
                         else:
                             room['image'] = ship_system['@img']
                         for systemBlueprint in de.systemBlueprints:
