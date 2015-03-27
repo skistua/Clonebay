@@ -59,7 +59,7 @@ def buildSectorMap(game_data, events, eventLists):
 def buildSector(description, sectorNum, game_data, events, eventLists):
     sector = {}
     sector['description'] = description
-    sector['beacons'] = {}
+    sector['beacons'] = []
     totalBeacons = 1    
     
     #build the start beacon    
@@ -78,7 +78,7 @@ def buildSector(description, sectorNum, game_data, events, eventLists):
             break
     else:
         print("error -- event: " + startEventName + " not found!")
-    sector['beacons'][0] = buildBeacon(startEvent, random.randint(0,150), -1)
+    sector['beacons'].append(buildBeacon(startEvent, random.randint(0,150), -1))
     sector['beacons'][0]['id'] = 0
     
     #add the other beacons from the template  
@@ -104,7 +104,7 @@ def buildSector(description, sectorNum, game_data, events, eventLists):
         while counter < count:
                     beacon = buildBeacon(beacon_event, -1, -1)
                     beacon['id'] = totalBeacons
-                    sector['beacons'][totalBeacons] = beacon
+                    sector['beacons'].append(beacon)
                     totalBeacons = totalBeacons + 1
                     counter = counter + 1
 
@@ -112,24 +112,19 @@ def buildSector(description, sectorNum, game_data, events, eventLists):
     #TODO: add exit beacon
     
     #connect the dots
-    i = 0
-    while i < totalBeacons:
-        sector['beacons'][i]['connections'] = {}
-        j = 0
-        count = 0
-        while j < totalBeacons:
-            if i != j:
-                xdiff = sector['beacons'][i]['x'] - sector['beacons'][j]['x']
-                ydiff = sector['beacons'][i]['y'] - sector['beacons'][j]['y']
+    for beacon in sector['beacons']:
+        
+        beacon['connections'] = []
+        for other_beacon in sector['beacons']:
+            if other_beacon == beacon:
+                pass
+            else:
+                xdiff = beacon['x'] - other_beacon['x']
+                ydiff = beacon['y'] - other_beacon['y']
                 if (-150 < xdiff < 150):
                     if (-150 < ydiff < 150):
-                        sector['beacons'][i]['connections'][count] = sector['beacons'][j]['id']
-                        count = count + 1
-            j = j + 1            
-        i = i + 1
-        
-        
-                
+                        beacon['connections'].append(other_beacon['id'])
+                                        
     #todo:  pathfinding to make sure all nodes are accessible    
     return sector
 

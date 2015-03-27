@@ -9,9 +9,55 @@ from src.Ship import Ship
 
 BLACK = (0,0,0)
 WHITE = (255, 255, 255)
+YELLOW = (255,255, 0)
 FLOOR = (230, 226, 219)
 TILEBORDER = (172, 169, 164)
 
+
+
+
+### from www.pygame.org/wiki/TextWrap
+
+# draw some text into an area of a surface
+# automatically wraps words
+# returns any text that didn't get blitted
+def drawText(surface, text, color, rect, font, aa=False, bkg=None):
+    rect = Rect(rect)
+    y = rect.top
+    lineSpacing = -2
+ 
+    # get the height of the font
+    fontHeight = font.size("Tg")[1]
+ 
+    while text:
+        i = 1
+ 
+        # determine if the row of text will be outside our area
+        if y + fontHeight > rect.bottom:
+            break
+ 
+        # determine maximum width of line
+        while font.size(text[:i])[0] < rect.width and i < len(text):
+            i += 1
+ 
+        # if we've wrapped the text, then adjust the wrap to the last word      
+        if i < len(text): 
+            i = text.rfind(" ", 0, i) + 1
+ 
+        # render the line and blit it to the surface
+        if bkg:
+            image = font.render(text[:i], 1, color, bkg)
+            image.set_colorkey(bkg)
+        else:
+            image = font.render(text[:i], aa, color)
+ 
+        surface.blit(image, (rect.left, y))
+        y += fontHeight + lineSpacing
+ 
+        # remove the text we just blitted
+        text = text[i:]
+ 
+    return text, y
 
 
 def initPlayerShip(ps, de):
@@ -109,11 +155,7 @@ def play():
     pygame.mixer.pre_init(44100, -16, 1, 512)
     pygame.mixer.init()
     pygame.font.init()
-    
-    
-    
-    
-    
+        
     k_up = k_down = k_left = k_right = 0
     
     #load images 
@@ -134,6 +176,8 @@ def play():
     pointer_valid = pygame.image.load(str(de.gamepack['img']['pointerValid'])).convert_alpha()
     pointer_invalid = pygame.image.load(str(de.gamepack['img']['pointerInvalid'])).convert_alpha()
     
+    
+    #main menu buttons
     buttons = {}
     buttons_top = 285
     counter = 0
@@ -153,26 +197,64 @@ def play():
         button['rect'].top = buttons_top + (counter * 60)
         counter += 1
         buttons[button_name] = button
+        
+    
+    #set up main UI
+    ui = {}
+    ui['jump_button_charged'] = pygame.image.load(str(de.gamepack['img']['FTL_JUMP'])).convert_alpha()
+    ui['map_backgrounds'] = []
+    ui['map_backgrounds'].append(pygame.image.load(str(de.gamepack['img']['zone_1'])))
+    ui['map_backgrounds'].append(pygame.image.load(str(de.gamepack['img']['zone_2'])))
+    ui['map_backgrounds'].append(pygame.image.load(str(de.gamepack['img']['zone_3'])))
+    map_background_rect = ui['map_backgrounds'][0].get_rect()
+    map_background_rect.center = screen_center
+    
+    ui['map_images'] = {}
+    ui['map_images']['unvisited'] = pygame.image.load(str(de.gamepack['img']['map_icon_diamond_yellow'])).convert_alpha()
+    ui['map_images']['visited'] = pygame.image.load(str(de.gamepack['img']['map_icon_diamond_blue'])).convert_alpha()
+    ui['map_images']['warning'] = pygame.image.load(str(de.gamepack['img']['map_icon_warning'])).convert_alpha()
+    ui['map_images']['danger'] = pygame.image.load(str(de.gamepack['img']['map_icon_triangle_red'])).convert_alpha()
+    ui['map_images']['ship'] = pygame.image.load(str(de.gamepack['img']['map_icon_ship'])).convert_alpha()    
+    ui['map_images']['targetbox'] = pygame.image.load(str(de.gamepack['img']['map_targetbox'])).convert_alpha()
+    
+    
+    
+    
+    #set up fonts
+    pygame.font.init()
+    font_10 = pygame.font.Font(str(de.gamepack['fonts']['JustinFont10']), 10)
+    font_11 = pygame.font.Font(str(de.gamepack['fonts']['JustinFont11']), 11)
+    font_11_bold = pygame.font.Font(str(de.gamepack['fonts']['JustinFont11Bold']), 11)
+    font_12 = pygame.font.Font(str(de.gamepack['fonts']['JustinFont12']), 12)
+    font_12_bold = pygame.font.Font(str(de.gamepack['fonts']['JustinFont12Bold']), 12)
+    font_7 = pygame.font.Font(str(de.gamepack['fonts']['JustinFont7']), 7)
+    font_8 = pygame.font.Font(str(de.gamepack['fonts']['JustinFont8']), 8)
+    num_font =pygame.font.Font(str(de.gamepack['fonts']['num_font']), 10)
+    
+    choice_rects = []
+    
+    
     
     
     #load sounds
     
     #Can't preload sounds and have it still work on pi.
-    print('Loading sounds ...')
+    #print('Loading sounds ...')
     
-    sounds = {}
+    #sounds = {}
     #for sound_file, sound_path in de.gamepack['sounds'].items():
     #    print('\t'+sound_file)
     #    if sound_file != 'path':
     #        sounds[sound_file] = pygame.mixer.Sound(str(sound_path))
             
-    print('Loading Music...')
+    #print('Loading Music...')
     #loading all these sounds in advance chews up fucktons of RAM
-    music = {}
+    #music = {}
     
-    #DO THIS SOMEWHERE ELSE!  Inconsistencies make this tough!
+    #DO THIS SOMEWHERE ELSE! (Really, this is a job for the Clonebay_Importer): Sanitize stuff
+    # Inconsistencies make this tough!
     mpre = 'bp_MUS_'
-    track_map = {'civil': 'Civil',
+    track_map = {'civilian': 'Civil',
                  'colonial': 'Colonial',
                  'cosmos': 'Cosmos',
                  'debris': 'Debris',
@@ -181,6 +263,7 @@ def play():
                  'hack': 'Hack',
                  'lostship': 'LostShip',
                  'mantis': 'Mantis',
+                 'milkyway': 'MilkyWay',
                  'rockmen': 'Rockmen',
                  'shrike': 'Shrike',
                  'slug': 'Slug',
@@ -196,29 +279,30 @@ def play():
         #print('\t'+music_file)
         #if music_file != 'path':
             #music[music_file] = pygame.mixer.Sound(str(music_path))
-    #initialize the game state
+    
+    
     
     bleep = pygame.mixer.Sound(str(de.gamepack['sounds']['select_light1']))
-    music_vol = 0.1
+    music_vol = 0.05
     game_vol = 1.0
-    
-    
     current_vol = 0.000
+    
+    #initialize the game state
+    
     flippers = False
     countie = 0
     indy = 0
     paused = True
     in_combat = False
+    jump_ready = True
     first_time = True
     can_continue = False
     mouse_image = pointer_invalid
     game_view = 'main_menu' 
     bleeping = False
     pressing_key = False
-    # main_menu
-    # main_options
-    # main_stats
-    # hangar
+    show_game_menu = False
+
     player_ships = []
     player_ship_index = 0
     for shipBlueprint in de.shipBlueprints:
@@ -228,19 +312,16 @@ def play():
     player_ships_count = len(player_ships) - 1
     de.player_ship = Ship(player_ships[0], de)
     initPlayerShip(de.player_ship, de)
+    
+    
+    
     # game
+    
     subview = 'none'
-    # beacon_map
-    # sector_map
-    # game_menu
-    # store
-    # ship_menu_upgrades
-    # ship_menu_crew
-    # ship_menu_equipment
-    # none?
+    visited_beacons = []
+        
     
-    
-    
+    #Main Game loop
     while 1:
         # USER INPUT
         clock.tick(60)
@@ -361,6 +442,7 @@ def play():
                 cur_sector = de.world_map[0]
                 cur_beacon = cur_sector['beacons'][0]
                 cur_event = cur_beacon['event']
+                visited_beacons.append(cur_beacon['id'])
                 subview = 'show_event'
                 first_time = False
                 #set up the music
@@ -368,6 +450,8 @@ def play():
                 avl_tracks = cur_sector['description']['trackList']['track']
                 randomizer = randint(0, len(avl_tracks) - 1)
                 trackset = avl_tracks[randomizer]
+                randomizer = randint(0, len(ui['map_backgrounds']) - 1)
+                map_background = ui['map_backgrounds'][randomizer]
                 
                 #Need to clean this stuff up in dataloader
                 
@@ -377,9 +461,11 @@ def play():
                 mus_explore.set_volume(0)
                 mus_explore.play(-1)
                 mus_battle.play(-1)
+                #map_background = pygame.image.load()
                 pass
             
             frame_events = pygame.event.get()
+            mouse_buttons = pygame.mouse.get_pressed()
             # do input handling that should happen consistently every frame, such as 'KEY_ESC'.
             
             
@@ -434,29 +520,86 @@ def play():
                 #pass 
             #blit systems and crew UI
             
+            #just for testing
+            if jump_ready:
+                jump_ready_rect = ui['jump_button_charged'].get_rect()
+                jump_ready_rect.x = 500
+                screen.blit(ui['jump_button_charged'], jump_ready_rect)
+                
+            
             if subview == 'none':
+                if jump_ready_rect.collidepoint(mousepos):
+                    if mouse_buttons[0]:
+                        subview = 'beacon_map'
                 #handle inputs for combat, or idling
                 #everything should already be drawn.
-                pass
 
                 
 
             elif subview == 'show_event':
+                choice_rects = []
                 paused = True
-                print (cur_event['text'])
                 
+                event_rect = Rect(400, 300, 400, 300)
+                event_rect.center = screen_center
                 
                 #blit the event window
                 
                 
                 #blit the text
-                
-                
+                #drawText(surface, text, color, rect, font, aa, bkg)
+                screen.fill(BLACK, event_rect)
+                event_rect.h -= 20
+                event_rect.w -= 20
+                event_rect.x += 10
+                event_rect.y += 10
+                try:
+                    full, offset = drawText(screen, cur_event['text'], WHITE, event_rect, font_12_bold, bkg=BLACK )
+                except(TypeError):
+                    full, offset = drawText(screen, cur_event['text']['#text'], WHITE, event_rect, font_12_bold, bkg=BLACK )
+                event_rect.h -= 20
+                event_rect.w -= 20
+                event_rect.x += 10
+                event_rect.y += 10
+
                 #blit the choices
+                i = 0
+
                 if 'choices' in cur_event:
-                    choices = cur_event['choices']
-                    for k, choice in choices:
-                        print(choice['text'])
+                    choices = cur_event['choices']                    
+                    for choice in choices:
+                        choice_rects.append(event_rect)
+                        choice_rects[i].top = offset + 10
+                        full, choicebottom = drawText(screen, str(i+1) + '. ' + choice['text'], WHITE, choice_rects[i], font_12) 
+                        choice_rects[i].h = choicebottom - choice_rects[i].top 
+                        if choice_rects[i].collidepoint(mousepos):
+                            full, choicebottom = drawText(screen, str(i+1) + '. ' + choice['text'], YELLOW, choice_rects[i], font_12)
+                            if mouse_buttons[0]:
+                                cur_event = choice['event']
+                        offset = choicebottom
+                        i += 1
+                    else:
+                        choice_rects.append(event_rect)
+                        choice_rects[i].top = offset + 10
+                        full, choicebottom = drawText(screen, '1. Ok', WHITE, choice_rects[i], font_12) 
+                        choice_rects[i].h =  choicebottom - choice_rects[i].top 
+                        if choice_rects[i].collidepoint(mousepos):
+                            full, choicebottom = drawText(screen, '1. Ok', YELLOW, choice_rects[i], font_12) 
+                            if mouse_buttons[0]:
+                                subview = 'none'
+                else:
+                    choice_rects.append(event_rect)
+                    choice_rects[i].top = offset + 10
+                    full, choicebottom = drawText(screen, '1. Ok', WHITE, choice_rects[i], font_12) 
+                    choice_rects[i].h =  choicebottom - choice_rects[i].top 
+                    if choice_rects[i].collidepoint(mousepos):
+                        full, choicebottom = drawText(screen, '1. Ok', YELLOW, choice_rects[i], font_12) 
+                        if mouse_buttons[0]:
+                            subview = 'none'
+                    
+
+
+
                 #for choice in event_cur['choices']:
                 #    pass
                 
@@ -475,19 +618,41 @@ def play():
             elif subview == 'beacon_map':    
                 
                 screen.blit(map_background, map_background_rect)
-                for beacon in de.world_map[indy]['beacons'].items():
-                
-                    listy = list(beacon)
-                print("Blitting Sector: " + str(indy + 1) + ". beacon_id: " + str(listy[1]['id']))
-                beacon_x = listy[1]['x'] + 300
-                beacon_y = listy[1]['y'] + 165
-                beacon_rect = beacon_image.get_rect()
-                beacon_location = (beacon_x, beacon_y)
-                beacon_rect.center =beacon_location
-                screen.blit(beacon_image, beacon_rect)
-            
-            
+                for beacon in cur_sector['beacons']:
+                    beacon_x = beacon['x'] + 300
+                    beacon_y = beacon['y'] + 165
+                    if beacon['id'] == cur_beacon['id']:
+                        beacon_image = ui['map_images']['ship']
+                    elif beacon['id'] in visited_beacons:
+                        beacon_image = ui['map_images']['visited']
+                    else:
+                        beacon_image = ui['map_images']['unvisited']
+                    if beacon['id'] in cur_beacon['connections']:
+                        #show connections
+                        pass                        
+                    beacon_rect = beacon_image.get_rect()
+                    beacon_location = (beacon_x, beacon_y)
+                    beacon_rect.center =beacon_location
+                    screen.blit(beacon_image, beacon_rect)
+                    if beacon_rect.collidepoint(mousepos):
+                        
+                        if beacon['id'] in cur_beacon['connections']:
+                            screen.blit(ui['map_images']['targetbox'], beacon_rect)
+                            
+                            #play bleeping sound
+                            if mouse_buttons[0]:
+                                #Jump!
+                                
+                                #animate the jump!
+                                
+                                cur_beacon = beacon
+                                cur_event = cur_beacon['event']
+                                subview = 'show_event'
 
+                        else:
+                            #show beacon connections
+                            pass
+                        
             
             
             elif subview == 'sector_map':

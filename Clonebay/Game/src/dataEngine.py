@@ -56,6 +56,8 @@ class DataEngine:
                     if 'shipBlueprint' in mapEvent:
                         print(mapEvent['shipBlueprint'])
         
+                self.world_map[self.i]['beacons'][self.j]['event'] = mapEvent
+                
                 self.j = self.j + 1
             self.i = self.i + 1
             self.j = 0
