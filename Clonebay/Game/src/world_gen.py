@@ -121,8 +121,8 @@ def buildSector(description, sectorNum, game_data, events, eventLists):
             else:
                 xdiff = beacon['x'] - other_beacon['x']
                 ydiff = beacon['y'] - other_beacon['y']
-                if (-150 < xdiff < 150):
-                    if (-150 < ydiff < 150):
+                if (-300 < xdiff < 300):
+                    if (-300 < ydiff < 300):
                         beacon['connections'].append(other_beacon['id'])
                                         
     #todo:  pathfinding to make sure all nodes are accessible    

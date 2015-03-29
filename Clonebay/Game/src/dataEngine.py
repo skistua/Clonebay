@@ -1,6 +1,7 @@
 from src.GamepackLoader import loadGamepacks
 from src.world_gen import genWorld
 from random import randint
+from asyncio import events
 
 class DataEngine:
     def tick(self):
@@ -84,6 +85,34 @@ class DataEngine:
     
     def load_ship(self, ship):
         pass
+    
+    def find_event(self, id):
+        for eventList in self.eventlists:
+            try:
+                if eventList['@name'] == id:
+                    self.eventList = eventList['event']
+                    self.randomizer = randint(0, len(eventList) - 1)
+                    self.selected_event = self.eventList[self.randomizer]
+                    
+                    #for event in self.events:
+                    #    if event['@name'] == self.event_id:
+                    #        return event
+                    if 'choice' in self.selected_event:
+                        self.selected_event['choices'] = []
+                    
+                        ##This is fscking stupid.
+                        while len(self.selected_event['choice']) > 0:
+                            try:
+                                self.selected_event['choices'].append(self.selected_event['choice'].pop())
+                                #NOOOOOOO!!!!    
+                            except(TypeError):
+                                self.selected_event['choices'].append(self.selected_event['choice'])
+                                break
+                    return self.selected_event
+            except:
+                print(eventList)            
+                 
+            
     
     def load_event(self, meta_event):
         if 'event' in meta_event:
