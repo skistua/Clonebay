@@ -217,7 +217,16 @@ def play():
     ui['map_images']['ship'] = pygame.image.load(str(de.gamepack['img']['map_icon_ship'])).convert_alpha()    
     ui['map_images']['targetbox'] = pygame.image.load(str(de.gamepack['img']['map_targetbox'])).convert_alpha()
     
-    
+    #We don't need alpha for these.  They are always the bottom layer
+    backgrounds = { 'blueStarcluster': pygame.image.load(str(de.gamepack['img']['bg_blueStarcluster'])).convert(),
+                    'darknebula':  pygame.image.load(str(de.gamepack['img']['bg_darknebula'])).convert(),
+                    'dullstars': pygame.image.load(str(de.gamepack['img']['bg_dullstars'])).convert(),
+                    'dullstars2': pygame.image.load(str(de.gamepack['img']['bg_dullstars2'])).convert(),
+                    'lonelyRedStar': pygame.image.load(str(de.gamepack['img']['bg_lonelyRedStar'])).convert(),
+                    'lonelyStar': pygame.image.load(str(de.gamepack['img']['bg_lonelystar'])).convert()
+                   }
+    background = backgrounds['lonelyStar']
+    planets = {}
     
     
     #set up fonts
@@ -230,6 +239,8 @@ def play():
     font_7 = pygame.font.Font(str(de.gamepack['fonts']['JustinFont7']), 7)
     font_8 = pygame.font.Font(str(de.gamepack['fonts']['JustinFont8']), 8)
     num_font =pygame.font.Font(str(de.gamepack['fonts']['num_font']), 10)
+    cc_font = pygame.font.Font(str(de.gamepack['fonts']['c&c']), 14)
+    cc_new_font = pygame.font.Font(str(de.gamepack['fonts']['c&cnew']), 14)
     
     choice_rects = []
     
@@ -441,6 +452,7 @@ def play():
                 #get the starting event
                 cur_sector = de.world_map[0]
                 cur_beacon = cur_sector['beacons'][0]
+                cur_beacon['background'] = background
                 cur_event = cur_beacon['event']
                 visited_beacons.append(cur_beacon['id'])
                 subview = 'show_event'
@@ -462,6 +474,7 @@ def play():
                 mus_explore.play(-1)
                 mus_battle.play(-1)
                 #map_background = pygame.image.load()
+                
                 pass
             
             frame_events = pygame.event.get()
@@ -501,6 +514,21 @@ def play():
             
             #draw the background
             screen.fill(BLACK)
+
+            screen.blit(cur_beacon['background'], screen.get_rect())
+            
+           
+            try:
+                if '@planet' in cur_event['text'].items():
+                    pass
+            except(KeyError):
+                pass
+            except(AttributeError):
+                pass
+            except(ValueError):
+                pass
+            
+            
             #do more here
             
             
@@ -533,8 +561,7 @@ def play():
                         subview = 'beacon_map'
                 #handle inputs for combat, or idling
                 #everything should already be drawn.
-
-                
+           
 
             elif subview == 'show_event':
                 choice_rects = []
@@ -554,9 +581,13 @@ def play():
                 event_rect.x += 10
                 event_rect.y += 10
                 try:
-                    full, offset = drawText(screen, cur_event['text'], WHITE, event_rect, font_12_bold, bkg=BLACK )
+                    full, offset = drawText(screen, cur_event['text'], WHITE, event_rect, cc_font, bkg=BLACK )
                 except(TypeError):
-                    full, offset = drawText(screen, cur_event['text']['#text'], WHITE, event_rect, font_12_bold, bkg=BLACK )
+                    full, offset = drawText(screen, cur_event['text']['#text'], WHITE, event_rect, cc_font, bkg=BLACK )
+                except(KeyError):
+                    print("ERROR!  THIS EVENT HAS NO 'text'")
+                    print(cur_event)
+                    cur_event['text'] = 'ERROR!'
                 event_rect.h -= 20
                 event_rect.w -= 20
                 event_rect.x += 10
@@ -564,36 +595,35 @@ def play():
 
                 #blit the choices
                 i = 0
-
                 if 'choices' in cur_event:
                     choices = cur_event['choices']                    
                     for choice in choices:
                         choice_rects.append(event_rect)
                         choice_rects[i].top = offset + 10
-                        full, choicebottom = drawText(screen, str(i+1) + '. ' + choice['text'], WHITE, choice_rects[i], font_12) 
-                        choice_rects[i].h = choicebottom - choice_rects[i].top 
+                        full, offset = drawText(screen, str(i+1) + '. ' + choice['text'], WHITE, choice_rects[i], cc_font) 
+                        choice_rects[i].h = offset - choice_rects[i].top 
                         if choice_rects[i].collidepoint(mousepos):
-                            full, choicebottom = drawText(screen, str(i+1) + '. ' + choice['text'], YELLOW, choice_rects[i], font_12)
+                            full, choicebottom = drawText(screen, str(i+1) + '. ' + choice['text'], YELLOW, choice_rects[i], cc_font)
                             if mouse_buttons[0]:
                                 cur_event = choice['event']
-                        offset = choicebottom
+                        offset += 10
                         i += 1
                     else:
                         choice_rects.append(event_rect)
                         choice_rects[i].top = offset + 10
-                        full, choicebottom = drawText(screen, '1. Ok', WHITE, choice_rects[i], font_12) 
+                        full, choicebottom = drawText(screen, '1. Ok', WHITE, choice_rects[i], cc_font) 
                         choice_rects[i].h =  choicebottom - choice_rects[i].top 
                         if choice_rects[i].collidepoint(mousepos):
-                            full, choicebottom = drawText(screen, '1. Ok', YELLOW, choice_rects[i], font_12) 
+                            full, choicebottom = drawText(screen, '1. Ok', YELLOW, choice_rects[i], cc_font) 
                             if mouse_buttons[0]:
                                 subview = 'none'
                 else:
                     choice_rects.append(event_rect)
                     choice_rects[i].top = offset + 10
-                    full, choicebottom = drawText(screen, '1. Ok', WHITE, choice_rects[i], font_12) 
+                    full, choicebottom = drawText(screen, '1. Ok', WHITE, choice_rects[i], cc_font) 
                     choice_rects[i].h =  choicebottom - choice_rects[i].top 
                     if choice_rects[i].collidepoint(mousepos):
-                        full, choicebottom = drawText(screen, '1. Ok', YELLOW, choice_rects[i], font_12) 
+                        full, choicebottom = drawText(screen, '1. Ok', YELLOW, choice_rects[i], cc_font) 
                         if mouse_buttons[0]:
                             subview = 'none'
                     
@@ -648,7 +678,19 @@ def play():
                                 cur_beacon = beacon
                                 cur_event = cur_beacon['event']
                                 subview = 'show_event'
-
+                                i = 0
+                                visited_beacons.append(cur_beacon['id'])
+                                for k, v in cur_beacon.items():
+                                    if k == 'background':
+                                        break
+                                else:
+                                    randomizer = randint(0, len(backgrounds)-1)
+                                    for k, background in backgrounds.items():
+                                        if i == randomizer:
+                                            cur_beacon['background'] = background
+                                            break
+                                        i += 1
+                                
                         else:
                             #show beacon connections
                             pass
