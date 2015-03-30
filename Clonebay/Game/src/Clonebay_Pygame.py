@@ -1,4 +1,4 @@
-import pygame, math, sys
+import pygame, math, sys, os, time
 from pygame.locals import * 
 from pygame import Rect
 from pygame import draw
@@ -140,7 +140,30 @@ def play():
     screen_y = 720
     screen_center = (screen_x / 2, screen_y / 2)
     
-    screen = pygame.display.set_mode((screen_x, screen_y))     
+    
+    #enable framebuffer on Raspi.  Might break on non-linux stuff.
+    disp_no = os.getenv("DISPLAY")
+    if disp_no:
+        print("I'm running under X display = " + str(disp_no))
+        screen = pygame.display.set_mode((screen_x, screen_y))     
+    else:
+        drivers = ['fbcon', 'directfb', 'svgalib']
+        found = False
+        for driver in drivers:
+            # Make sure that SDL_VIDEODRIVER is set
+            if not os.getenv('SDL_VIDEODRIVER'):
+                os.putenv('SDL_VIDEODRIVER', driver)
+            try:
+                pygame.display.init()
+            except pygame.error:
+                print ('Driver: ' + driver + ' failed')
+                continue
+            found = True
+            break
+
+        if not found:
+            raise Exception('No suitable video driver found!')
+        screen = pygame.display.set_mode((screen_x, screen_y), pygame.FULLSCREEN)
     screen.fill(BLACK)
     
     title_background = pygame.image.load('layouts/main_menu_background.png').convert()
