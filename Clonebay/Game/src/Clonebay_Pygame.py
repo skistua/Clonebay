@@ -166,6 +166,7 @@ def play():
         screen = pygame.display.set_mode((screen_x, screen_y), pygame.FULLSCREEN)
     screen.fill(BLACK)
     
+    
     title_background = pygame.image.load('layouts/main_menu_background.png').convert()
     screen.blit(title_background, screen.get_rect())
     pygame.display.flip()
@@ -452,6 +453,8 @@ def play():
                 elif event.key == K_RETURN:
                     game_view = 'game'
                     first_time = True
+                    screen.blit(title_background, screen.get_rect())
+                    pygame.display.flip() 
                 elif event.key == K_UP and down:
                     if not pressing_key:
                         if player_ship_index == player_ships_count:
@@ -479,7 +482,7 @@ def play():
             
             
             
-        elif game_view == 'game':
+        if game_view == 'game':
             
             #This needs to happen early, or stuff won't work.
              #Store these for different handling based on context.
