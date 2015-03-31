@@ -1,5 +1,5 @@
 ##Ship class
-
+from src.Person import Person
 
 
 
@@ -28,8 +28,8 @@ class Ship:
                              'y': int(bp['layout']['offsets']['cloak']['@y'])}
         
         
-        self.crew = []
-        #add the crew
+        
+             
         
         self.drone_slots = int(bp['droneSlots'])
         self.drones = []
@@ -135,6 +135,31 @@ class Ship:
         self.max_power = int(bp['maxPower']['@amount'])
         self.name = bp['name']
         self.ellipse = bp['layout']['ellipse']
+        
+        #add the crew
+        self.crew = []
+        crew_id = 1
+        for crew_type in bp['crewCount']:
+            try:
+                self.race_count = int(crew_type['@amount'])
+
+
+                i = 0
+                while i < self.race_count:
+                #def Person(self, person_id, race)
+                    self.crew.append(Person(de, crew_id, crew_type['@class']))
+                    crew_id += 1
+                    i += 1
+            except:
+                crew_type = bp['crewCount']
+                self.race_count = int(crew_type['@amount'])
+                i = 0
+                while i < self.race_count:
+                #def Person(self, person_id, race)
+                    self.crew.append(Person(de, crew_id, crew_type['@class']))
+                    crew_id += 1
+                    i += 1
+                break
 
                              
         

@@ -190,10 +190,6 @@ class DataEngine:
         self.crewBlueprints = self.buildListByType('crewBlueprint')
         self.sectorDescriptions = self.buildListByType('sectorDescription')
         self.sectorTypes = self.buildListByType('sectorType')
-        self.image_paths = []
-        for k, imagepath in self.gamepack['img'].items():
-            print(k)
-            print(imagepath)
     ##TODO Handle overwrites
     
         #keep player as dict or create class?
@@ -207,6 +203,17 @@ class DataEngine:
             except(KeyError):
                 print("whoops!")
     
-    
+        self.names = {}
+        for nameList in self.game_data['names']['nameList']:
+            self.names[nameList['@sex']] = []  #intentionally left ambiguous.  FTL only includes 'male' and 'female'
+        for nameList in self.game_data['names']['nameList']:
+            for person_name in nameList['name']:
+                try:
+                    print(nameList['@sex'] + ': ' + person_name)
+                    self.names[nameList['@sex']].append(person_name)
+                except:
+                    print(nameList['@sex'] + ': ' + person_name['#text'])
+                    self.names[nameList['@sex']].append(person_name['#text'])
+                    
     
  

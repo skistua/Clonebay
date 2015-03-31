@@ -235,6 +235,7 @@ def play():
     
     ui['map_images'] = {}
     ui['map_images']['unvisited'] = pygame.image.load(str(de.gamepack['img']['map_icon_diamond_yellow'])).convert_alpha()
+    beacon_rect = ui['map_images']['unvisited'].get_rect()
     ui['map_images']['visited'] = pygame.image.load(str(de.gamepack['img']['map_icon_diamond_blue'])).convert_alpha()
     ui['map_images']['warning'] = pygame.image.load(str(de.gamepack['img']['map_icon_warning'])).convert_alpha()
     ui['map_images']['danger'] = pygame.image.load(str(de.gamepack['img']['map_icon_triangle_red'])).convert_alpha()
@@ -730,7 +731,7 @@ def play():
                     if beacon['id'] in cur_beacon['connections']:
                         #show connections
                         pass                        
-                    beacon_rect = beacon_image.get_rect()
+
                     beacon_location = (beacon_x, beacon_y)
                     beacon_rect.center =beacon_location
                     screen.blit(beacon_image, beacon_rect)
