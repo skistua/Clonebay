@@ -59,6 +59,45 @@ def drawText(surface, text, color, rect, font, aa=False, bkg=None):
  
     return text, y
 
+def initAnimation(bp, de, sheet, rect):
+    anim = {'length': int(bp['desc']['@length']),
+            'x': int(bp['desc']['@x']),
+            'y': int(bp['desc']['@y']),
+            'time': float(bp['time'])
+            }
+    frames = []
+    i = 0
+    while i < anim['length']:
+        frame_rect = Rect((anim['x']*rect.w) + (i * rect.w), anim['y'] * rect.h, rect.w, rect.h)
+        try:
+            frame = sheet.subsurface(frame_rect)
+            frames.append(frame)
+        except:
+            print("OVERRUN FRAME COUNT!")
+        i += 1
+    anim['frames'] = frames
+    return anim
+    
+    
+def initCrewMember(cm, de):
+    print("initializing " + cm.race + ': ' +  cm.name)
+    sheet_string = cm.anim_sheet['#text']
+    sheet_string = sheet_string[:-4]
+    cm.sheet = pygame.image.load(str(de.gamepack['img'][sheet_string])).convert_alpha()
+    cm.sheet_rect = cm.sheet.get_rect()
+    cm.frame_rect = Rect(0 , 0, int(cm.anim_sheet['@fw']), int(cm.anim_sheet['@fh']))
+    cm.animations = {}
+    for k, v in cm.anim.items():
+        anim_names_parts = k.split('_')
+        for part in anim_names_parts:
+            print(part)
+        if len(anim_names_parts) == 2:
+            cm.animations[anim_names_parts[1]] = initAnimation(v, de, cm.sheet, cm.frame_rect)
+            
+        elif len(anim_names_parts) == 3:
+            if not anim_names_parts[1] in cm.animations:
+                cm.animations[anim_names_parts[1]] = {}
+            cm.animations[anim_names_parts[1]][anim_names_parts[2]] = initAnimation(v, de, cm.sheet, cm.frame_rect) 
 
 def initPlayerShip(ps, de):
     ps.base_image = pygame.image.load(str(de.gamepack['img'][ps.base_image_name])).convert_alpha()
@@ -82,6 +121,14 @@ def initPlayerShip(ps, de):
                 room['system_image'] = pygame.image.load(str(de.gamepack['img']['s_' + room['system']['name'] + '_overlay'])).convert_alpha()
                 room['system_image_rect'] = room['system_image'].get_rect()
                 break
+    for crew_member in ps.crew:
+        initCrewMember(crew_member, de)
+        crew_member.rect = crew_member.frame_rect
+        try:
+            crew_member.cur_anim = crew_member.animations[crew_member.activity][crew_member.direction]
+        except:
+            crew_member.cur_anim = crew_member.animations[crew_member.activity]
+        crew_member.cur_frame = 0
             
 
 def blitPlayerShip(ps, location, screen, de):
@@ -126,7 +173,14 @@ def blitPlayerShip(ps, location, screen, de):
         draw.rect(screen, BLACK, room['rect'],  3)
             #room0_x = room0_x + ps_floor_location[0]
             #room0_y = room0_y + ps_floor_location[1]
-        #for crew_member in ps.crew:
+        for crew_member in ps.crew:
+            cm_loc = tuple(map(sum,zip(crew_member.location ,ps.floor_location, ps.tiles_offset)))
+            crew_member.rect.center = cm_loc
+            screen.blit(crew_member.cur_anim['frames'][crew_member.cur_frame], crew_member.rect)
+            if crew_member.cur_frame == len(crew_member.cur_anim['frames']) - 1:
+                crew_member.cur_frame = 0
+            else:
+                crew_member.cur_frame += 1
         #    blitCrewMember(crew_member, ps, de, screen)
     
     

@@ -21,10 +21,10 @@ class Person:
         self.name = de.names[self.sex][randomizer]
         
         self.anim = {}
-        for anim in de.game_data['animations']['anim']:
+        for anim in de.anims:
             if anim['sheet'] == race:
                 self.anim[anim['@name']] = anim
-        for animsheet in de.game_data['animations']['animSheet']:
+        for animsheet in de.animSheets:
             if animsheet['@name'] == race:
                 self.anim_sheet = animsheet
                     

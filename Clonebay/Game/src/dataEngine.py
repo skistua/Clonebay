@@ -190,6 +190,10 @@ class DataEngine:
         self.crewBlueprints = self.buildListByType('crewBlueprint')
         self.sectorDescriptions = self.buildListByType('sectorDescription')
         self.sectorTypes = self.buildListByType('sectorType')
+        self.anims = self.buildListByType('anim')
+        self.animSheets = self.buildListByType('animSheet')
+        self.weaponAnims = self.buildListByType('weaponAnim')
+        
     ##TODO Handle overwrites
     
         #keep player as dict or create class?

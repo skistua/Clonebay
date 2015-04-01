@@ -160,6 +160,31 @@ class Ship:
                     crew_id += 1
                     i += 1
                 break
+        manning_priority = ['pilot',
+                            'engines',
+                            'weapons',
+                            'shields',
+                            'doors',
+                            'sensors'
+                            'oxygen'
+                            ]
+        i = 0
+        for crew_member in self.crew:
+            print('Trying to send  ' + crew_member.name + ' to system ' + manning_priority[i])
+            crew_member.dest_system = self.ship_systems[manning_priority[i]]
+            crew_member.dest_room = self.rooms[int(crew_member.dest_system['@room'])]
+            if 'slot' in crew_member.dest_system:
+                crew_member.dest_tile = crew_member.dest_room['tiles'][int(crew_member.dest_system['slot']['number'])]
+                crew_member.direction = crew_member.dest_system['slot']['direction']
+            else:
+                crew_member.dest_tile = crew_member.dest_room['tiles'][0]
+                crew_member.direction = 'down'
+            crew_member.activity = 'type'
+            
+            crew_member.location = (crew_member.dest_tile[0] + 16, crew_member.dest_tile[1] + 16)
+            i += 1                                
+            
+            
 
                              
         
