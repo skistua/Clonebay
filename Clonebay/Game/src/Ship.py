@@ -1,8 +1,6 @@
 ##Ship class
 from src.Person import Person
 
-
-
 class Ship:
     def __init__(self, bp, de):
         self.blueprint = bp
@@ -11,11 +9,7 @@ class Ship:
         print("loading ship: " + self.id)
         self.basename = bp['@img']
         self.base_image_name = self.basename +'_base'
-        if 'floorImage' in bp:
-            self.floor_image_name = bp['floorImage'] + '_floor'
-        else: 
-            self.floor_image_name = self.basename + '_floor'
-            
+        
         if 'shieldImage' in bp:
             self.shield_image_name = bp['shieldImage']+ '_shields1'
         else:
@@ -30,7 +24,6 @@ class Ship:
         
         
              
-        
         self.drone_slots = int(bp['droneSlots'])
         self.drones = []
         #add the drones
@@ -139,51 +132,60 @@ class Ship:
         #add the crew
         self.crew = []
         crew_id = 1
-        for crew_type in bp['crewCount']:
-            try:
-                self.race_count = int(crew_type['@amount'])
-
-
-                i = 0
-                while i < self.race_count:
-                #def Person(self, person_id, race)
-                    self.crew.append(Person(de, crew_id, crew_type['@class']))
-                    crew_id += 1
-                    i += 1
-            except:
-                crew_type = bp['crewCount']
-                self.race_count = int(crew_type['@amount'])
-                i = 0
-                while i < self.race_count:
-                #def Person(self, person_id, race)
-                    self.crew.append(Person(de, crew_id, crew_type['@class']))
-                    crew_id += 1
-                    i += 1
-                break
-        manning_priority = ['pilot',
-                            'engines',
-                            'weapons',
-                            'shields',
-                            'doors',
-                            'sensors'
-                            'oxygen'
-                            ]
-        i = 0
-        for crew_member in self.crew:
-            print('Trying to send  ' + crew_member.name + ' to system ' + manning_priority[i])
-            crew_member.dest_system = self.ship_systems[manning_priority[i]]
-            crew_member.dest_room = self.rooms[int(crew_member.dest_system['@room'])]
-            if 'slot' in crew_member.dest_system:
-                crew_member.dest_tile = crew_member.dest_room['tiles'][int(crew_member.dest_system['slot']['number'])]
-                crew_member.direction = crew_member.dest_system['slot']['direction']
-            else:
-                crew_member.dest_tile = crew_member.dest_room['tiles'][0]
-                crew_member.direction = 'down'
-            crew_member.activity = 'type'
+        if 'crewCount' in bp:
+            for crew_type in bp['crewCount']:
+                try:
+                    self.race_count = int(crew_type['@amount'])
+    
+    
+                    i = 0
+                    while i < self.race_count:
+                    #def Person(self, person_id, race)
+                        self.crew.append(Person(de, crew_id, crew_type['@class']))
+                        crew_id += 1
+                        i += 1
+                except:
+                    crew_type = bp['crewCount']
+                    self.race_count = int(crew_type['@amount'])
+                    i = 0
+                    while i < self.race_count:
+                    #def Person(self, person_id, race)
+                        self.crew.append(Person(de, crew_id, crew_type['@class']))
+                        crew_id += 1
+                        i += 1
+                    break
+            manning_priority = ['pilot',
+                                'engines',
+                                'weapons',
+                                'shields',
+                                'doors',
+                                'sensors'
+                                'oxygen'
+                                ]
+            i = 0
+            for crew_member in self.crew:
+                print('Trying to send  ' + crew_member.name + ' to system ' + manning_priority[i])
+                crew_member.dest_system = self.ship_systems[manning_priority[i]]
+                crew_member.dest_room = self.rooms[int(crew_member.dest_system['@room'])]
+                if 'slot' in crew_member.dest_system:
+                    crew_member.dest_tile = crew_member.dest_room['tiles'][int(crew_member.dest_system['slot']['number'])]
+                    crew_member.direction = crew_member.dest_system['slot']['direction']
+                else:
+                    crew_member.dest_tile = crew_member.dest_room['tiles'][0]
+                    crew_member.direction = 'down'
+                crew_member.activity = 'type'
+                
+                crew_member.location = (crew_member.dest_tile[0] + 16, crew_member.dest_tile[1] + 16)
+                i += 1                                
             
-            crew_member.location = (crew_member.dest_tile[0] + 16, crew_member.dest_tile[1] + 16)
-            i += 1                                
-            
+class PlayerShip(Ship):
+    def __init__(self, bp, de):
+        super(PlayerShip, self).__init__(bp, de)
+        
+        if 'floorImage' in bp:
+            self.floor_image_name = bp['floorImage'] + '_floor'
+        else: 
+            self.floor_image_name = self.basename + '_floor'
             
 
                              

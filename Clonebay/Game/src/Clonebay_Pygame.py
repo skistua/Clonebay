@@ -5,7 +5,7 @@ from pygame import draw
 from random import randint
 
 from src.dataEngine import DataEngine
-from src.Ship import Ship
+from src.Ship import Ship, PlayerShip
 
 BLACK = (0,0,0)
 WHITE = (255, 255, 255)
@@ -59,7 +59,7 @@ def drawText(surface, text, color, rect, font, aa=False, bkg=None):
  
     return text, y
 
-def initAnimation(bp, de, sheet, rect):
+def initAnimation(bp, de, sheet, rect, sheet_rect):
     anim = {'length': int(bp['desc']['@length']),
             'x': int(bp['desc']['@x']),
             'y': int(bp['desc']['@y']),
@@ -68,7 +68,7 @@ def initAnimation(bp, de, sheet, rect):
     frames = []
     i = 0
     while i < anim['length']:
-        frame_rect = Rect((anim['x']*rect.w) + (i * rect.w), anim['y'] * rect.h, rect.w, rect.h)
+        frame_rect = Rect((anim['x']*rect.w) + (i * rect.w), sheet_rect.bottom - ((anim['y'] + 1) * rect.h), rect.w, rect.h)
         try:
             frame = sheet.subsurface(frame_rect)
             frames.append(frame)
@@ -92,12 +92,12 @@ def initCrewMember(cm, de):
         for part in anim_names_parts:
             print(part)
         if len(anim_names_parts) == 2:
-            cm.animations[anim_names_parts[1]] = initAnimation(v, de, cm.sheet, cm.frame_rect)
+            cm.animations[anim_names_parts[1]] = initAnimation(v, de, cm.sheet, cm.frame_rect, cm.sheet_rect)
             
         elif len(anim_names_parts) == 3:
             if not anim_names_parts[1] in cm.animations:
                 cm.animations[anim_names_parts[1]] = {}
-            cm.animations[anim_names_parts[1]][anim_names_parts[2]] = initAnimation(v, de, cm.sheet, cm.frame_rect) 
+            cm.animations[anim_names_parts[1]][anim_names_parts[2]] = initAnimation(v, de, cm.sheet, cm.frame_rect, cm.sheet_rect) 
 
 def initPlayerShip(ps, de):
     ps.base_image = pygame.image.load(str(de.gamepack['img'][ps.base_image_name])).convert_alpha()
@@ -177,10 +177,6 @@ def blitPlayerShip(ps, location, screen, de):
             cm_loc = tuple(map(sum,zip(crew_member.location ,ps.floor_location, ps.tiles_offset)))
             crew_member.rect.center = cm_loc
             screen.blit(crew_member.cur_anim['frames'][crew_member.cur_frame], crew_member.rect)
-            if crew_member.cur_frame == len(crew_member.cur_anim['frames']) - 1:
-                crew_member.cur_frame = 0
-            else:
-                crew_member.cur_frame += 1
         #    blitCrewMember(crew_member, ps, de, screen)
     
     
@@ -414,7 +410,7 @@ def play():
             player_ships.append(shipBlueprint)
             print(shipBlueprint['name'])
     player_ships_count = len(player_ships) - 1
-    de.player_ship = Ship(player_ships[0], de)
+    de.player_ship = PlayerShip(player_ships[0], de)
     initPlayerShip(de.player_ship, de)
     
     
@@ -516,7 +512,7 @@ def play():
                             player_ship_index = 0                    
                         else: 
                             player_ship_index += 1
-                        de.player_ship = Ship(player_ships[player_ship_index], de)
+                        de.player_ship = PlayerShip(player_ships[player_ship_index], de)
                         initPlayerShip(de.player_ship, de)
                         print("Ship selected: " + de.player_ship.id + " -- "+ de.player_ship.name)
                     pressing_key = True
@@ -526,7 +522,7 @@ def play():
                             player_ship_index = player_ships_count
                         else: 
                             player_ship_index -= 1
-                        de.player_ship = Ship(player_ships[player_ship_index], de)
+                        de.player_ship = PlayerShip(player_ships[player_ship_index], de)
                         initPlayerShip(de.player_ship, de)
                         print("Ship selected: " + de.player_ship.id + " -- "+ de.player_ship.name)
                     pressing_key = True
