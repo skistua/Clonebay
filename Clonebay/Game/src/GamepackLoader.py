@@ -1,8 +1,15 @@
 from src.pathlib import Path 
 from src.dataLoader import loadGameData
+from _collections import deque
 
-
-
+def nested_set(dic, keys, value):
+    for key in keys[:-1]:
+        dic = dic.setdefault(key, {})
+    try:
+        dic[keys[-1]] = value
+    except:
+        dic[keys[-1]]['none'] = value
+        
 def loadGamepacks():
     gamepacks = {}
     
@@ -64,6 +71,14 @@ def loadGamepacks():
                 suf = imagefile.suffix 
                 if suf == '.png':
                     print('Found image file: ' + imagefile.name)
-                    gamepack['img'][imagefile.stem] = imagefile       
+                    gamepack['img'][imagefile.stem] = imagefile  
+
+            gamepack['image_tree'] = {}
+            for image_name, image_path in gamepack['img'].items():
+                parts = image_name.split('_')
+                parts.append('.png')
+                nested_set(gamepack['image_tree'], parts, image_path)
+                    
+                   
                             
     return gamepacks

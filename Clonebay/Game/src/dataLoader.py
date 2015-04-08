@@ -43,8 +43,8 @@ def loadGameData(data_path):
                 usedfiles.append(shipXML)
                 
             with filename.open() as f:
-                ships[shipFile]["rooms"] = {}
-                ships[shipFile]["doors"] = {}
+                ships[shipFile]["rooms"] = []
+                ships[shipFile]["doors"] = []
                 while True:
                     line = f.readline()
                     if not line: 
@@ -73,7 +73,7 @@ def loadGameData(data_path):
                         room["y"] = int(f.readline()[:-1])
                         room["w"] = int(f.readline()[:-1])
                         room["h"] = int(f.readline()[:-1])
-                        ships[shipFile]["rooms"][roomCount] = room
+                        ships[shipFile]["rooms"].append(room)
                         roomCount = roomCount + 1
                     elif line == "DOOR\n":
                         door = {}
@@ -83,7 +83,7 @@ def loadGameData(data_path):
                         door["roomLU"] = int(f.readline()[:-1])
                         door["roomRD"] = int(f.readline()[:-1])
                         door["vertical"] = int(f.readline()[:-1])
-                        ships[shipFile]["doors"][doorCount] = door
+                        ships[shipFile]["doors"].append(door)
                         doorCount = doorCount + 1
                     else:
                         print("error parsing line: " + line)

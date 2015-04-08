@@ -76,7 +76,7 @@ def initAnimation(bp, de, sheet, rect, sheet_rect):
     while i < anim['length']:
         frame_rect = Rect((anim['x']*rect.w) + (i * rect.w), sheet_rect.bottom - ((anim['y'] + 1) * rect.h), rect.w, rect.h)
         try:
-            frame = sheet.subsurface(frame_rect)
+            frame = sheet.subsurface(frame_rect).copy()
             frames.append(frame)
         except:
             print("OVERRUN FRAME COUNT!")
@@ -84,6 +84,61 @@ def initAnimation(bp, de, sheet, rect, sheet_rect):
     anim['frames'] = frames
     return anim
     
+def initDoors(ship, de):
+    y = 0
+    doorsheet = pygame.image.load(str(de.gamepack['img']['door_sheet_large'])).convert_alpha()
+    doorsheet_rect = doorsheet.get_rect()
+    door_rect = doorsheet_rect.copy()
+    door_rect.w = door_rect.w / 5
+    door_rect.h = door_rect.h / 5
+    door_levels = []
+    door_levels_rotated = []
+    while y < 5:
+        bp = {}
+        bp['@name'] = 'level_' + str(y)
+        bp['desc'] = {'@length': 4,
+                      '@x': 0,
+                      '@y': y,                     
+                      }
+        bp['time'] = 0.5
+        door_levels.append(initAnimation(bp, de, doorsheet, door_rect, doorsheet_rect))
+        y += 1
+        
+    for door_level in door_levels:
+        door_level_rotated = door_level.copy()
+        door_level_rotated['frames'] = []
+        for frame in door_level['frames']:
+            new_frame = pygame.transform.rotate(frame, 90).copy()
+            new_rect = new_frame.get_rect()
+            
+            new_surface = pygame.Surface((35,35), pygame.SRCALPHA, 32)
+            new_surface.convert_alpha()
+            new_surface.fill(0)
+            new_surface.blit(new_frame, (0,0), new_rect)
+            frame = new_surface.copy()
+            door_level_rotated['frames'].append(frame)
+            
+        door_levels_rotated.append(door_level_rotated)
+        
+        
+    
+    for door in ship.doors:
+        if door['vertical']:
+            door['frames'] = door_levels[4]
+            door['location'] = (door['x'] * 35, door['y'] * 35)
+        else:
+            door['frames'] = door_levels_rotated[4]
+            door['location'] = (door['x'] * 35, door['y'] * 35)
+        new_rect = door['frames']['frames'][0].get_rect()
+        new_rect.center = door['location']
+
+        
+        door['frame_num'] = 0
+        door['rect'] = door_rect.copy()
+        
+    
+     
+    # set up an animation 
     
 def initCrewMember(cm, de):
     print("initializing " + cm.race + ': ' +  cm.name)
@@ -95,8 +150,6 @@ def initCrewMember(cm, de):
     cm.animations = {}
     for k, v in cm.anim.items():
         anim_names_parts = k.split('_')
-        for part in anim_names_parts:
-            print(part)
         if len(anim_names_parts) == 2:
             cm.animations[anim_names_parts[1]] = initAnimation(v, de, cm.sheet, cm.frame_rect, cm.sheet_rect)
             
@@ -111,7 +164,7 @@ def initPlayerShip(ps, de):
     ps.floor_image = pygame.image.load(str(de.gamepack['img'][ps.floor_image_name])).convert_alpha()
     ps.floor_rect = ps.floor_image.get_rect()
     ps.tiles_offset = ((ps.floor_rect.w - ps.width) / 2, (ps.floor_rect.h - ps.height)/2)
-    for k, room in ps.rooms.items():
+    for room in ps.rooms:
         room['rect'] = Rect(room['x_pix'], room['y_pix'], room['w_pix'], room['h_pix'])
         for key, v in room.items():
             if key == 'image':
@@ -135,6 +188,7 @@ def initPlayerShip(ps, de):
         except:
             crew_member.cur_anim = crew_member.animations[crew_member.activity]
         crew_member.cur_frame = 0
+    initDoors(ps, de)
             
 
 def blitPlayerShip(ps, location, screen, de):
@@ -156,7 +210,7 @@ def blitPlayerShip(ps, location, screen, de):
          
     
     
-    for k, room in ps.rooms.items():
+    for room in ps.rooms:
         room['location'] = tuple(map(sum,zip((room['x_pix'], room['y_pix']),ps.floor_location, ps.tiles_offset)))
         
         room['rect'].topleft = room['location']
@@ -177,6 +231,16 @@ def blitPlayerShip(ps, location, screen, de):
                 screen.blit(room['system_image'], room['system_image_rect']) #These should be masks
                 break
         draw.rect(screen, BLACK, room['rect'],  3)
+        for door in ps.doors:
+            doorloc = tuple(map(sum,zip(door['location'], ps.floor_location, ps.tiles_offset)))
+            if door['vertical']:
+                door['rect'].centerx = doorloc[0]
+                door['rect'].y = doorloc[1]
+            else:
+                door['rect'].x = doorloc[0]
+                door['rect'].centery = doorloc[1]
+            screen.blit(door['frames']['frames'][door['frame_num']], door['rect'])
+
             #room0_x = room0_x + ps_floor_location[0]
             #room0_y = room0_y + ps_floor_location[1]
         for crew_member in ps.crew:

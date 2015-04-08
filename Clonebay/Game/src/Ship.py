@@ -43,7 +43,7 @@ class Ship:
         self.tiles = []
         self.ship_systems = {}
         self.rooms = bp['layout']['rooms']
-        for k, room in self.rooms.items():
+        for room in self.rooms:
             room['x_pix'] =  35 * room['x']
             room['y_pix'] = 35 * room['y']
             room['w_pix'] = 35 * room['w']
@@ -147,6 +147,9 @@ class Ship:
         print('dimensions: ' + str(self.width) + ' x ' + str(self.height))
         
         self.doors = bp['layout']['doors']
+        for door in self.doors:
+            door['open'] = False
+
             
         self.layout = bp['layout']
         self.health = int(bp['health']['@amount'])

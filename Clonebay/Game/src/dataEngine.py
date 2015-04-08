@@ -220,5 +220,6 @@ class DataEngine:
                     print(nameList['@sex'] + ': ' + person_name['#text'])
                     self.names[nameList['@sex']].append(person_name['#text'])
                     
-    
+
+            
  
