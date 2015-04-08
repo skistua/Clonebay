@@ -194,6 +194,7 @@ class DataEngine:
         self.animSheets = self.buildListByType('animSheet')
         self.weaponAnims = self.buildListByType('weaponAnim')
         
+        
     ##TODO Handle overwrites
     
         #keep player as dict or create class?

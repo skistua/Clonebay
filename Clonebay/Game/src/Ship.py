@@ -3,6 +3,7 @@ from src.Person import Person
 
 class Ship:
     def __init__(self, bp, de):
+        self.is_player = False
         self.blueprint = bp
         #get all the data from the blueprint, and cast it correctly
         self.id = bp['@name']
@@ -52,9 +53,9 @@ class Ship:
             i = 0
             j = 0
             
-            while i < room['w']:
-                while j < room['h']:
-                    tile = (room['x_pix'] + i * 35, room['y_pix'] + j * 35)
+            while i < room['h']:
+                while j < room['w']:
+                    tile = (room['x_pix'] + j * 35, room['y_pix'] + i * 35)
                     room['tiles'].append(tile)
                     self.tiles.append(tile)
                     j += 1
@@ -96,7 +97,36 @@ class Ship:
                                 self.ship_systems[system_name] = ship_system
                                 self.ship_systems[system_name]['blueprint'] = systemBlueprint
                                 break
-                        
+                        for roomLayout in de.roomLayouts:
+                            if roomLayout['@name'] == system_name:
+                                room['computerGlow'] = {}
+                                room['computerGlow']['dir'] = roomLayout['computerGlow']['@dir'].lower()
+                                room['computerGlow']['x'] = int(roomLayout['computerGlow']['@x'])
+                                room['computerGlow']['y'] = int(roomLayout['computerGlow']['@y'])
+                                if 'slot' in ship_system:
+                                    room['slot'] = room['tiles'][int(ship_system['slot']['number'])]
+                                    room['computerGlow']['dir'] = ship_system['slot']['direction']
+                    
+                                else:            
+                                    slotx = int(room['computerGlow']['x'] / 35)
+                                    sloty = int(room['computerGlow']['y'] / 35)
+                                    
+                                    #could also do this with bitwise operation
+                                    if slotx:
+                                        if sloty:
+                                            room['slot'] = room['tiles'][3]
+                                        else:
+                                            room['slot'] = room['tiles'][1]
+                                    else:
+                                        if sloty:
+                                            try:
+                                                room['slot'] = room['tiles'][2]
+                                            except: #WTF?!?!?
+                                                print('Error:  slot tile not in room!')
+                                                room['slot'] = room['tiles'][0]
+                                        else:
+                                            room['slot'] = room['tiles'][0]
+                                            
                     else:
                         break                  
         
@@ -167,20 +197,15 @@ class Ship:
                 print('Trying to send  ' + crew_member.name + ' to system ' + manning_priority[i])
                 crew_member.dest_system = self.ship_systems[manning_priority[i]]
                 crew_member.dest_room = self.rooms[int(crew_member.dest_system['@room'])]
-                if 'slot' in crew_member.dest_system:
-                    crew_member.dest_tile = crew_member.dest_room['tiles'][int(crew_member.dest_system['slot']['number'])]
-                    crew_member.direction = crew_member.dest_system['slot']['direction']
-                else:
-                    crew_member.dest_tile = crew_member.dest_room['tiles'][0]
-                    crew_member.direction = 'down'
+                crew_member.direction = crew_member.dest_room['computerGlow']['dir']
+                crew_member.location = (crew_member.dest_room['slot'][0] + 16, crew_member.dest_room['slot'][1] + 16) 
                 crew_member.activity = 'type'
-                
-                crew_member.location = (crew_member.dest_tile[0] + 16, crew_member.dest_tile[1] + 16)
                 i += 1                                
             
 class PlayerShip(Ship):
     def __init__(self, bp, de):
         super(PlayerShip, self).__init__(bp, de)
+        self.is_player = True
         
         if 'floorImage' in bp:
             self.floor_image_name = bp['floorImage'] + '_floor'
@@ -188,7 +213,9 @@ class PlayerShip(Ship):
             self.floor_image_name = self.basename + '_floor'
             
 
+
+
                              
-        
+
     
         

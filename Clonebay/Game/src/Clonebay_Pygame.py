@@ -15,6 +15,12 @@ TILEBORDER = (172, 169, 164)
 
 
 
+class CrewSprite(pygame.sprite.Sprite):
+    def __init__(self, cm, ):
+        pass
+
+
+
 
 ### from www.pygame.org/wiki/TextWrap
 
