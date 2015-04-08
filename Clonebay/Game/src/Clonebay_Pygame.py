@@ -86,7 +86,7 @@ def initAnimation(bp, de, sheet, rect, sheet_rect):
     
 def initDoors(ship, de):
     y = 0
-    doorsheet = pygame.image.load(str(de.gamepack['img']['door_sheet_large'])).convert_alpha()
+    doorsheet = pygame.image.load(str(de.gamepack['img']['door_sheet'])).convert_alpha()
     doorsheet_rect = doorsheet.get_rect()
     door_rect = doorsheet_rect.copy()
     door_rect.w = door_rect.w / 5
@@ -235,10 +235,10 @@ def blitPlayerShip(ps, location, screen, de):
             doorloc = tuple(map(sum,zip(door['location'], ps.floor_location, ps.tiles_offset)))
             if door['vertical']:
                 door['rect'].centerx = doorloc[0]
-                door['rect'].y = doorloc[1]
+                door['rect'].y = doorloc[1] 
             else:
                 door['rect'].x = doorloc[0]
-                door['rect'].centery = doorloc[1]
+                door['rect'].centery = doorloc[1] - 1
             screen.blit(door['frames']['frames'][door['frame_num']], door['rect'])
 
             #room0_x = room0_x + ps_floor_location[0]
